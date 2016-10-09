@@ -1,17 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "map.h"
+
 /* Todo
 - in, length
 
 */
-
-typedef struct {
-    int size;
-    int len;
-    void **keys;
-    void **values;
-} map_t;
 
 map_t *map_new(int size) {
     map_t *map = calloc(1, sizeof(map_t));
@@ -91,15 +86,4 @@ void map_free(map_t *map) {
     free(map->values);
 
     free(map);
-}
-
-int main() {
-    map_t *map = map_new(2);
-
-    map_put(map, "test1", "test1");
-    map_put(map, "test2", "test2");
-
-    map_free(map);
-
-    return 0;
 }
