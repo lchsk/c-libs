@@ -1,6 +1,8 @@
 #ifndef XS_MAP_H
 #define XS_MAP_H
 
+#define XS_INITIAL_MAP_SIZE (16)
+
 typedef struct {
     int size;
     int len;
@@ -8,7 +10,7 @@ typedef struct {
     void **values;
 } map_t;
 
-map_t *map_new(int size);
+map_t *map_new();
 
 void map_put(map_t *map, void *key, void *value);
 

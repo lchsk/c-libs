@@ -8,12 +8,12 @@
 
 */
 
-map_t *map_new(int size) {
+map_t *map_new() {
     map_t *map = calloc(1, sizeof(map_t));
 
-    map->keys = calloc(size, sizeof(void *));
-    map->values = calloc(size, sizeof(void *));
-    map->size = size;
+    map->keys = calloc(XS_INITIAL_MAP_SIZE, sizeof(void *));
+    map->values = calloc(XS_INITIAL_MAP_SIZE, sizeof(void *));
+    map->size = XS_INITIAL_MAP_SIZE;
     map->len = 0;
 
     return map;

@@ -4,7 +4,7 @@
 
 Test(xs_map, map)
 {
-    map_t *map = map_new(10);
+    map_t *map = map_new();
 
     map_put(map, "Bugs", "Bunny");
 
