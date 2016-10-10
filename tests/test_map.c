@@ -1,3 +1,5 @@
+#include <stdio.h>
+
 #include <criterion/criterion.h>
 
 #include "../map.h"
@@ -48,4 +50,27 @@ Test(xs_map, different_types)
     cr_assert_eq(test->count, 42);
     cr_assert_str_eq(check_test->msg, "Bugs Bunny");
     cr_assert_str_eq(test->msg, "Bugs Bunny");
+}
+
+Test(xs_map, auto_resize)
+{
+    map_t *map = map_new();
+
+    char tmp[1000];
+
+    for (int i = 0; i < 1500; i++) {
+        snprintf(tmp, sizeof(tmp), "test %d", i);
+
+        map_put(map, tmp, tmp);
+    }
+
+    for (int i = 0; i < 1500; i++) {
+        snprintf(tmp, sizeof(tmp), "test %d", i);
+
+        char *value = map_get(map, tmp);
+
+        cr_assert_str_eq(tmp, value);
+    }
+
+    map_free(map);
 }
