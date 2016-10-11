@@ -13,13 +13,19 @@ Test(xs_map, different_types)
 {
     map_t *map = map_new();
 
+    cr_assert_eq(map_len(map), 0);
+
     /* Test string */
 
     map_put(map, "Bugs", "Bunny");
     cr_assert_str_eq(map_get(map, "Bugs"), "Bunny");
 
+    cr_assert_eq(map_len(map), 1);
+
     map_put(map, "Bugs Bunny", "bugs bunny");
     cr_assert_str_eq(map_get(map, "Bugs Bunny"), "bugs bunny");
+
+    cr_assert_eq(map_len(map), 2);
 
     /* Test int */
 
@@ -30,6 +36,8 @@ Test(xs_map, different_types)
     int *check_year = map_get(map, "year");
 
     cr_assert_eq(*check_year, *year);
+
+    cr_assert_eq(map_len(map), 3);
 
     /* Test structure */
 
@@ -43,6 +51,8 @@ Test(xs_map, different_types)
 
     cr_assert_eq(check_test->count, test->count);
     cr_assert_str_eq(check_test->msg, test->msg);
+
+    cr_assert_eq(map_len(map), 4);
 
     map_free(map);
 
@@ -59,6 +69,8 @@ Test(xs_map, auto_resize)
 {
     map_t *map = map_new();
 
+    cr_assert_eq(map_len(map), 0);
+
     char tmp[100];
 
     int items = 15000;
@@ -73,6 +85,8 @@ Test(xs_map, auto_resize)
 
         map_put(map, strings[i], strings[i]);
     }
+
+    cr_assert_eq(map_len(map), items);
 
     for (int i = 0; i < items; i++) {
         snprintf(tmp, sizeof(tmp), "Testy McTest %d", i);

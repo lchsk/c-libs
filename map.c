@@ -85,6 +85,11 @@ void *map_get(map_t *map, char *key) {
     return map->values[i];
 }
 
+unsigned map_len(map_t *map)
+{
+    return map->len;
+}
+
 void map_free(map_t *map) {
     free(map->keys);
     free(map->values);
