@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <string.h>
 
 #include "map.h"
 
@@ -25,7 +26,7 @@ unsigned long hash(unsigned char *str)
 map_t *map_new() {
     map_t *map = calloc(1, sizeof(map_t));
 
-    map->keys = calloc(XS_INITIAL_MAP_SIZE, sizeof(void *));
+    map->keys = calloc(XS_INITIAL_MAP_SIZE, sizeof(char *));
     map->values = calloc(XS_INITIAL_MAP_SIZE, sizeof(void *));
     map->size = XS_INITIAL_MAP_SIZE;
     map->len = 0;
@@ -33,7 +34,7 @@ map_t *map_new() {
     return map;
 }
 
-int map_index(map_t *map, void *key, void **keys) {
+int map_index(map_t *map, char *key, char **keys) {
     int i = hash(key) % map->size;
 
     while (keys[i] && strcmp(keys[i], key) != 0)
@@ -42,19 +43,19 @@ int map_index(map_t *map, void *key, void **keys) {
     return i;
 }
 
-void map_put(map_t *map, void *key, void *value) {
+void map_put(map_t *map, char *key, void *value) {
 
     if (3.0 / 2.0 * map->len >= map->size) {
 
         map->size = map->size * 2;
 
-        void **keys2 = calloc(map->size * 2, sizeof(void *));
+        char **keys2 = calloc(map->size * 2, sizeof(char *));
         void **values2 = calloc(map->size * 2, sizeof(void *));
 
         for (int i = 0; i < map->size / 2; i++) {
 
             char *key2 = map->keys[i];
-            char *value2 = map->values[i];
+            void *value2 = map->values[i];
 
             if (key2 && value2) {
                 int index = map_index(map, key2, keys2);
@@ -78,7 +79,7 @@ void map_put(map_t *map, void *key, void *value) {
     map->len++;
 }
 
-void *map_get(map_t *map, void *key) {
+void *map_get(map_t *map, char *key) {
     int i = map_index(map, key, map->keys);
 
     return map->values[i];

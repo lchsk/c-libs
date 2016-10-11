@@ -6,15 +6,15 @@
 typedef struct {
     int size;
     int len;
-    void **keys;
+    char **keys;
     void **values;
 } map_t;
 
 map_t *map_new();
 
-void map_put(map_t *map, void *key, void *value);
+void map_put(map_t *map, char *key, void *value);
 
-void *map_get(map_t *map, void *key);
+void *map_get(map_t *map, char *key);
 
 void map_free(map_t *map);
 
