@@ -56,20 +56,28 @@ Test(xs_map, auto_resize)
 {
     map_t *map = map_new();
 
-    char tmp[1000];
+    char tmp[100];
 
-    for (int i = 0; i < 1500; i++) {
-        snprintf(tmp, sizeof(tmp), "test %d", i);
+    int items = 1000;
+    char **strings = malloc(items * sizeof(char*));
 
-        map_put(map, tmp, tmp);
+    for (int i = 0; i < items; i++) {
+        strings[i] = malloc(100);
     }
 
-    for (int i = 0; i < 1500; i++) {
-        snprintf(tmp, sizeof(tmp), "test %d", i);
+    for (int i = 0; i < items; i++) {
+        snprintf(strings[i], sizeof(strings[i]), "%d", i);
+        snprintf(strings[i], sizeof(strings[i]), "%d", i);
+
+        map_put(map, strings[i], strings[i]);
+    }
+
+    for (int i = 0; i < items; i++) {
+        snprintf(tmp, sizeof(tmp), "%d", i);
 
         char *value = map_get(map, tmp);
 
-        cr_assert_str_eq(tmp, value);
+        cr_assert_str_eq(value, tmp);
     }
 
     map_free(map);
