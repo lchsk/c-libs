@@ -3,6 +3,8 @@
 
 #define XS_INITIAL_MAP_SIZE (16)
 
+#define XS_MAP_RESIZE_FACTOR (0.666)
+
 typedef struct {
     int size;
     int len;

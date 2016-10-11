@@ -6,12 +6,59 @@
 #include "map.h"
 
 /* Todo
-- in, length, remove
+- in, remove
 
 */
 
+static unsigned long hash(unsigned char *str);
+static int map_index(map_t *map, char *key, char **keys);
+static void resize(map_t *map);
+
+map_t *map_new()
+{
+    map_t *map = calloc(1, sizeof(map_t));
+
+    map->keys = calloc(XS_INITIAL_MAP_SIZE, sizeof(char *));
+    map->values = calloc(XS_INITIAL_MAP_SIZE, sizeof(void *));
+    map->size = XS_INITIAL_MAP_SIZE;
+    map->len = 0;
+
+    return map;
+}
+
+void map_put(map_t *map, char *key, void *value)
+{
+    resize(map);
+
+    int i = map_index(map, key, map->keys);
+
+    map->keys[i] = key;
+    map->values[i] = value;
+    map->len++;
+}
+
+void *map_get(map_t *map, char *key)
+{
+    int i = map_index(map, key, map->keys);
+
+    return map->values[i];
+}
+
+unsigned map_len(map_t *map)
+{
+    return map->len;
+}
+
+void map_free(map_t *map)
+{
+    free(map->keys);
+    free(map->values);
+
+    free(map);
+}
+
 /* djb2 (Bernstein) */
-unsigned long hash(unsigned char *str)
+static unsigned long hash(unsigned char *str)
 {
     unsigned long hash = 5381;
     int c;
@@ -23,18 +70,8 @@ unsigned long hash(unsigned char *str)
     return hash;
 }
 
-map_t *map_new() {
-    map_t *map = calloc(1, sizeof(map_t));
-
-    map->keys = calloc(XS_INITIAL_MAP_SIZE, sizeof(char *));
-    map->values = calloc(XS_INITIAL_MAP_SIZE, sizeof(void *));
-    map->size = XS_INITIAL_MAP_SIZE;
-    map->len = 0;
-
-    return map;
-}
-
-int map_index(map_t *map, char *key, char **keys) {
+static int map_index(map_t *map, char *key, char **keys)
+{
     int i = hash(key) % map->size;
 
     while (keys[i] && strcmp(keys[i], key) != 0)
@@ -43,56 +80,30 @@ int map_index(map_t *map, char *key, char **keys) {
     return i;
 }
 
-void map_put(map_t *map, char *key, void *value) {
-
-    if (3.0 / 2.0 * map->len >= map->size) {
-
+static void resize(map_t *map)
+{
+    if (map->len >= map->size * XS_MAP_RESIZE_FACTOR) {
         map->size = map->size * 2;
 
-        char **keys2 = calloc(map->size * 2, sizeof(char *));
-        void **values2 = calloc(map->size * 2, sizeof(void *));
+        char **keys = calloc(map->size, sizeof(char *));
+        void **values = calloc(map->size, sizeof(void *));
 
         for (int i = 0; i < map->size / 2; i++) {
+            char *key = map->keys[i];
+            void *value = map->values[i];
 
-            char *key2 = map->keys[i];
-            void *value2 = map->values[i];
+            if (key && value) {
+                int index = map_index(map, key, keys);
 
-            if (key2 && value2) {
-                int index = map_index(map, key2, keys2);
-
-                keys2[index] = key2;
-                values2[index] = value2;
+                keys[index] = key;
+                values[index] = value;
             }
         }
 
         free(map->keys);
         free(map->values);
 
-        map->keys = keys2;
-        map->values = values2;
+        map->keys = keys;
+        map->values = values;
     }
-    
-    int i = map_index(map, key, map->keys);
-
-    map->keys[i] = key;
-    map->values[i] = value;
-    map->len++;
-}
-
-void *map_get(map_t *map, char *key) {
-    int i = map_index(map, key, map->keys);
-
-    return map->values[i];
-}
-
-unsigned map_len(map_t *map)
-{
-    return map->len;
-}
-
-void map_free(map_t *map) {
-    free(map->keys);
-    free(map->values);
-
-    free(map);
 }
