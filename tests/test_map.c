@@ -18,6 +18,9 @@ Test(xs_map, different_types)
     map_put(map, "Bugs", "Bunny");
     cr_assert_str_eq(map_get(map, "Bugs"), "Bunny");
 
+    map_put(map, "Bugs Bunny", "bugs bunny");
+    cr_assert_str_eq(map_get(map, "Bugs Bunny"), "bugs bunny");
+
     /* Test int */
 
     int *year = malloc(sizeof(int));
@@ -58,7 +61,7 @@ Test(xs_map, auto_resize)
 
     char tmp[100];
 
-    int items = 1000;
+    int items = 15000;
     char **strings = malloc(items * sizeof(char*));
 
     for (int i = 0; i < items; i++) {
@@ -66,14 +69,13 @@ Test(xs_map, auto_resize)
     }
 
     for (int i = 0; i < items; i++) {
-        snprintf(strings[i], sizeof(strings[i]), "%d", i);
-        snprintf(strings[i], sizeof(strings[i]), "%d", i);
+        snprintf(strings[i], 1000, "Testy McTest %d", i);
 
         map_put(map, strings[i], strings[i]);
     }
 
     for (int i = 0; i < items; i++) {
-        snprintf(tmp, sizeof(tmp), "%d", i);
+        snprintf(tmp, sizeof(tmp), "Testy McTest %d", i);
 
         char *value = map_get(map, tmp);
 
