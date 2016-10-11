@@ -6,8 +6,7 @@
 #include "map.h"
 
 /* Todo
-- in, remove
-
+- remove
 */
 
 static unsigned long hash(unsigned char *str);
@@ -47,6 +46,11 @@ void *map_get(map_t *map, char *key)
 unsigned map_len(map_t *map)
 {
     return map->len;
+}
+
+unsigned map_in(map_t *map, char *key)
+{
+    return map_get(map, key) ? 1 : 0;
 }
 
 void map_free(map_t *map)

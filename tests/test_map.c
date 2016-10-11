@@ -65,6 +65,23 @@ Test(xs_map, different_types)
     cr_assert_str_eq(test->msg, "Bugs Bunny");
 }
 
+Test(xs_map, get)
+{
+    map_t *map = map_new();
+
+    char *val = map_get(map, "Bugs Bunny");
+
+    cr_assert_null(val);
+
+    cr_assert_eq(map_in(map, "Bugs Bunny"), 0);
+
+    map_put(map, "Bugs Bunny", "Bugs Bunny");
+
+    cr_assert_eq(map_in(map, "Bugs Bunny"), 1);
+
+    map_free(map);
+}
+
 Test(xs_map, auto_resize)
 {
     map_t *map = map_new();
