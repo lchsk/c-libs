@@ -82,6 +82,23 @@ Test(xs_map, get)
     map_free(map);
 }
 
+Test(xs_map, del)
+{
+    map_t *map = map_new();
+
+    cr_assert_eq(map_len(map), 0);
+
+    map_put(map, "Bugs", "Bunny");
+
+    cr_assert_eq(map_len(map), 1);
+
+    map_del(map, "Bugs");
+
+    cr_assert_eq(map_len(map), 0);
+
+    map_free(map);
+}
+
 Test(xs_map, auto_resize)
 {
     map_t *map = map_new();

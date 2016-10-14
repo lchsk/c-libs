@@ -16,6 +16,8 @@ map_t *map_new();
 
 void map_put(map_t *map, char *key, void *value);
 
+void map_del(map_t *map, char *key);
+
 void *map_get(map_t *map, char *key);
 
 unsigned map_in(map_t *map, char *key);

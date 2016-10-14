@@ -5,10 +5,6 @@
 
 #include "map.h"
 
-/* Todo
-- remove
-*/
-
 static unsigned long hash(unsigned char *str);
 static int map_index(map_t *map, char *key, char **keys);
 static void resize(map_t *map);
@@ -34,6 +30,15 @@ void map_put(map_t *map, char *key, void *value)
     map->keys[i] = key;
     map->values[i] = value;
     map->len++;
+}
+
+void map_del(map_t *map, char *key)
+{
+    int i = map_index(map, key, map->keys);
+
+    map->values[i] = NULL;
+    map->keys[i] = NULL;
+    map->len--;
 }
 
 void *map_get(map_t *map, char *key)
