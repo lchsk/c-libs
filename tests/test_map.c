@@ -88,6 +88,8 @@ Test(xs_map, del)
 
     cr_assert_eq(map_len(map), 0);
 
+    /* Test string */
+
     map_put(map, "Bugs", "Bunny");
 
     cr_assert_eq(map_len(map), 1);
@@ -96,6 +98,26 @@ Test(xs_map, del)
 
     cr_assert_eq(map_len(map), 0);
 
+    /* Test structure */
+
+    test_t *test = malloc(sizeof(test_t));
+    test->count = 42;
+    test->msg = strdup("Bugs Bunny");
+
+    map_put(map, "Bugs", test);
+
+    cr_assert_eq(map_len(map), 1);
+
+    test_t *check_test = map_get(map, "Bugs");
+
+    cr_assert_eq(check_test->count, test->count);
+    cr_assert_str_eq(check_test->msg, test->msg);
+
+    map_del(map, "Bugs");
+
+    cr_assert_eq(map_len(map), 0);
+
+    free(test);
     map_free(map);
 }
 
