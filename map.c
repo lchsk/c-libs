@@ -36,9 +36,11 @@ void map_del(map_t *map, char *key)
 {
     int i = map_index(map, key, map->keys);
 
-    map->values[i] = NULL;
-    map->keys[i] = NULL;
-    map->len--;
+    if (map->values[i] && map->keys[i]) {
+        map->values[i] = NULL;
+        map->keys[i] = NULL;
+        map->len--;
+    }
 }
 
 void *map_get(map_t *map, char *key)

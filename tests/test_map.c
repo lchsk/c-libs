@@ -98,6 +98,15 @@ Test(xs_map, del)
 
     cr_assert_eq(map_len(map), 0);
 
+    /* Check items that do not exist */
+    map_del(map, "Bugs");
+
+    cr_assert_eq(map_len(map), 0);
+
+    map_del(map, "Bunny");
+
+    cr_assert_eq(map_len(map), 0);
+
     /* Test structure */
 
     test_t *test = malloc(sizeof(test_t));
