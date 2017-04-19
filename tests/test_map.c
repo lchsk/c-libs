@@ -1,6 +1,7 @@
 #include <stdio.h>
-
-#include <criterion/criterion.h>
+#include <stdlib.h>
+#include <string.h>
+#include <assert.h>
 
 #include "../map.h"
 
@@ -9,23 +10,27 @@ typedef struct {
     int count;
 } test_t;
 
-Test(xs_map, different_types)
+#define xs_eq(val1, val2) assert(val1 == val2)
+#define xs_null(val) assert(val == NULL)
+#define xs_str_eq(str1, str2) assert(strcmp(str1, str2) == 0)
+
+void test_different_types()
 {
     map_t *map = map_new();
 
-    cr_assert_eq(map_len(map), 0);
+    xs_eq(map_len(map), 0);
 
     /* Test string */
 
     map_put(map, "Bugs", "Bunny");
-    cr_assert_str_eq(map_get(map, "Bugs"), "Bunny");
+    xs_str_eq(map_get(map, "Bugs"), "Bunny");
 
-    cr_assert_eq(map_len(map), 1);
+    xs_eq(map_len(map), 1);
 
     map_put(map, "Bugs Bunny", "bugs bunny");
-    cr_assert_str_eq(map_get(map, "Bugs Bunny"), "bugs bunny");
+    xs_str_eq(map_get(map, "Bugs Bunny"), "bugs bunny");
 
-    cr_assert_eq(map_len(map), 2);
+    xs_eq(map_len(map), 2);
 
     /* Test int */
 
@@ -35,9 +40,9 @@ Test(xs_map, different_types)
 
     int *check_year = map_get(map, "year");
 
-    cr_assert_eq(*check_year, *year);
+    xs_eq(*check_year, *year);
 
-    cr_assert_eq(map_len(map), 3);
+    xs_eq(map_len(map), 3);
 
     /* Test structure */
 
@@ -49,63 +54,63 @@ Test(xs_map, different_types)
 
     test_t *check_test = map_get(map, "bugs_test");
 
-    cr_assert_eq(check_test->count, test->count);
-    cr_assert_str_eq(check_test->msg, test->msg);
+    xs_eq(check_test->count, test->count);
+    xs_str_eq(check_test->msg, test->msg);
 
-    cr_assert_eq(map_len(map), 4);
+    xs_eq(map_len(map), 4);
 
     map_free(map);
 
-    cr_assert_eq(*year, 1940);
-    cr_assert_eq(*check_year, 1940);
+    xs_eq(*year, 1940);
+    xs_eq(*check_year, 1940);
 
-    cr_assert_eq(check_test->count, 42);
-    cr_assert_eq(test->count, 42);
-    cr_assert_str_eq(check_test->msg, "Bugs Bunny");
-    cr_assert_str_eq(test->msg, "Bugs Bunny");
+    xs_eq(check_test->count, 42);
+    xs_eq(test->count, 42);
+    xs_str_eq(check_test->msg, "Bugs Bunny");
+    xs_str_eq(test->msg, "Bugs Bunny");
 }
 
-Test(xs_map, get)
+void test_get()
 {
     map_t *map = map_new();
 
     char *val = map_get(map, "Bugs Bunny");
 
-    cr_assert_null(val);
+    xs_null(val);
 
-    cr_assert_eq(map_in(map, "Bugs Bunny"), 0);
+    xs_eq(map_in(map, "Bugs Bunny"), 0);
 
     map_put(map, "Bugs Bunny", "Bugs Bunny");
 
-    cr_assert_eq(map_in(map, "Bugs Bunny"), 1);
+    xs_eq(map_in(map, "Bugs Bunny"), 1);
 
     map_free(map);
 }
 
-Test(xs_map, del)
+void test_del()
 {
     map_t *map = map_new();
 
-    cr_assert_eq(map_len(map), 0);
+    xs_eq(map_len(map), 0);
 
     /* Test string */
 
     map_put(map, "Bugs", "Bunny");
 
-    cr_assert_eq(map_len(map), 1);
+    xs_eq(map_len(map), 1);
 
     map_del(map, "Bugs");
 
-    cr_assert_eq(map_len(map), 0);
+    xs_eq(map_len(map), 0);
 
     /* Check items that do not exist */
     map_del(map, "Bugs");
 
-    cr_assert_eq(map_len(map), 0);
+    xs_eq(map_len(map), 0);
 
     map_del(map, "Bunny");
 
-    cr_assert_eq(map_len(map), 0);
+    xs_eq(map_len(map), 0);
 
     /* Test structure */
 
@@ -115,26 +120,26 @@ Test(xs_map, del)
 
     map_put(map, "Bugs", test);
 
-    cr_assert_eq(map_len(map), 1);
+    xs_eq(map_len(map), 1);
 
     test_t *check_test = map_get(map, "Bugs");
 
-    cr_assert_eq(check_test->count, test->count);
-    cr_assert_str_eq(check_test->msg, test->msg);
+    xs_eq(check_test->count, test->count);
+    xs_str_eq(check_test->msg, test->msg);
 
     map_del(map, "Bugs");
 
-    cr_assert_eq(map_len(map), 0);
+    xs_eq(map_len(map), 0);
 
     free(test);
     map_free(map);
 }
 
-Test(xs_map, auto_resize)
+void test_auto_resize()
 {
     map_t *map = map_new();
 
-    cr_assert_eq(map_len(map), 0);
+    xs_eq(map_len(map), 0);
 
     char tmp[100];
 
@@ -151,15 +156,23 @@ Test(xs_map, auto_resize)
         map_put(map, strings[i], strings[i]);
     }
 
-    cr_assert_eq(map_len(map), items);
+    xs_eq(map_len(map), items);
 
     for (int i = 0; i < items; i++) {
         snprintf(tmp, sizeof(tmp), "Testy McTest %d", i);
 
         char *value = map_get(map, tmp);
 
-        cr_assert_str_eq(value, tmp);
+        xs_str_eq(value, tmp);
     }
 
     map_free(map);
+}
+
+int main(int argc, char *argv[])
+{
+    test_different_types();
+    test_get();
+    test_del();
+    test_auto_resize();
 }
