@@ -3,7 +3,7 @@
 #include <string.h>
 #include <assert.h>
 
-#include "../map.h"
+#include "map.h"
 
 typedef struct {
     char *msg;
