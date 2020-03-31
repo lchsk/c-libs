@@ -1,40 +1,76 @@
-#include <stdio.h>
 #include <stdlib.h>
-#include <stdint.h>
-#include <string.h>
+#include <assert.h>
 
 #include "map.h"
 
-static unsigned long hash(unsigned char *str);
-static int map_index(map_t *map, char *key, char **keys);
-static void resize(map_t *map);
+static unsigned long hash(unsigned char const *str);
+static const int map_index(Map *map, char *key, char **keys);
+static void resize(Map *map);
 
-map_t *map_new()
+// How full the map must be in order to trigger resize
+static const double MAP_RESIZE_TRIGGER = 0.6;
+
+// By what factor we're enlarging the map
+static const int MAP_RESIZE_FACTOR = 2;
+
+int _strcmp(const char* s1, const char* s2)
 {
-    map_t *map = calloc(1, sizeof(map_t));
+    while(*s1 && (*s1 == *s2))
+    {
+        s1++;
+        s2++;
+    }
 
-    map->keys = calloc(XS_INITIAL_MAP_SIZE, sizeof(char *));
-    map->values = calloc(XS_INITIAL_MAP_SIZE, sizeof(void *));
-    map->size = XS_INITIAL_MAP_SIZE;
+    return *(const unsigned char*)s1 - *(const unsigned char*)s2;
+}
+
+Map *map_new(int initial_size)
+{
+    Map *map = malloc(sizeof(map));
+
+    map->keys = malloc(initial_size * sizeof(char *));
+    map->values = malloc(initial_size * sizeof(void *));
+    map->size = initial_size;
     map->len = 0;
 
     return map;
 }
 
-void map_put(map_t *map, char *key, void *value)
+void map_free(Map *map)
 {
+    if (!map) {
+        return;
+    }
+
+    if (map->keys) {
+        free(map->keys);
+    }
+
+    if (map->values) {
+        free(map->values);
+    }
+
+    free(map);
+}
+
+void map_set(Map *map, char *key, void *value)
+{
+    assert(map != NULL);
+
     resize(map);
 
-    int i = map_index(map, key, map->keys);
+    const int i = map_index(map, key, map->keys);
 
     map->keys[i] = key;
     map->values[i] = value;
     map->len++;
 }
 
-void map_del(map_t *map, char *key)
+void map_del(Map *map, char *key)
 {
-    int i = map_index(map, key, map->keys);
+    assert(map != NULL);
+
+    const int i = map_index(map, key, map->keys);
 
     if (map->values[i] && map->keys[i]) {
         map->values[i] = NULL;
@@ -43,33 +79,31 @@ void map_del(map_t *map, char *key)
     }
 }
 
-void *map_get(map_t *map, char *key)
+void *map_get(Map *map, char *key)
 {
-    int i = map_index(map, key, map->keys);
+    assert(map != NULL);
+
+    const int i = map_index(map, key, map->keys);
 
     return map->values[i];
 }
 
-unsigned map_len(map_t *map)
+const int map_len(Map *map)
 {
+    assert(map != NULL);
+
     return map->len;
 }
 
-unsigned map_in(map_t *map, char *key)
+const int map_in(Map *map, char *key)
 {
+    assert(map != NULL);
+
     return map_get(map, key) ? 1 : 0;
 }
 
-void map_free(map_t *map)
-{
-    free(map->keys);
-    free(map->values);
-
-    free(map);
-}
-
 /* djb2 (Bernstein) */
-static unsigned long hash(unsigned char *str)
+static unsigned long hash(unsigned char const *str)
 {
     unsigned long hash = 5381;
     int c;
@@ -81,40 +115,44 @@ static unsigned long hash(unsigned char *str)
     return hash;
 }
 
-static int map_index(map_t *map, char *key, char **keys)
+static const int map_index(Map *map, char *key, char **keys)
 {
+    assert(map != NULL);
+
     int i = hash(key) % map->size;
 
-    while (keys[i] && strcmp(keys[i], key) != 0)
+    while (keys[i] && _strcmp(keys[i], key) != 0)
         i = (i + 1) % map->size;
 
     return i;
 }
 
-static void resize(map_t *map)
+static void resize(Map *map)
 {
-    if (map->len >= map->size * XS_MAP_RESIZE_FACTOR) {
-        map->size = map->size * 2;
-
-        char **keys = calloc(map->size, sizeof(char *));
-        void **values = calloc(map->size, sizeof(void *));
-
-        for (int i = 0; i < map->size / 2; i++) {
-            char *key = map->keys[i];
-            void *value = map->values[i];
-
-            if (key && value) {
-                int index = map_index(map, key, keys);
-
-                keys[index] = key;
-                values[index] = value;
-            }
-        }
-
-        free(map->keys);
-        free(map->values);
-
-        map->keys = keys;
-        map->values = values;
+    if (map->len < map->size * MAP_RESIZE_TRIGGER) {
+        return;
     }
+
+    map->size = map->size * MAP_RESIZE_FACTOR;
+
+    char **keys = malloc(map->size * sizeof(char *));
+    void **values = malloc(map->size * sizeof(void *));
+
+    for (int i = 0; i < map->size / MAP_RESIZE_FACTOR; i++) {
+        char *key = map->keys[i];
+        void *value = map->values[i];
+
+        if (key && value) {
+            const int index = map_index(map, key, keys);
+
+            keys[index] = key;
+            values[index] = value;
+        }
+    }
+
+    free(map->keys);
+    free(map->values);
+
+    map->keys = keys;
+    map->values = values;
 }

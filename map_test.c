@@ -8,128 +8,128 @@
 typedef struct {
     char *msg;
     int count;
-} test_t;
+} Test;
 
-#define xs_eq(val1, val2) assert(val1 == val2)
-#define xs_null(val) assert(val == NULL)
-#define xs_str_eq(str1, str2) assert(strcmp(str1, str2) == 0)
+#define eq(val1, val2) assert(val1 == val2)
+#define null(val) assert(val == NULL)
+#define str_eq(str1, str2) assert(strcmp(str1, str2) == 0)
 
 void test_different_types()
 {
-    map_t *map = map_new();
+    Map *map = map_new(5);
 
-    xs_eq(map_len(map), 0);
+    eq(map_len(map), 0);
 
     /* Test string */
 
-    map_put(map, "Bugs", "Bunny");
-    xs_str_eq(map_get(map, "Bugs"), "Bunny");
+    map_set(map, "Bugs", "Bunny");
+    str_eq(map_get(map, "Bugs"), "Bunny");
 
-    xs_eq(map_len(map), 1);
+    eq(map_len(map), 1);
 
-    map_put(map, "Bugs Bunny", "bugs bunny");
-    xs_str_eq(map_get(map, "Bugs Bunny"), "bugs bunny");
+    map_set(map, "Bugs Bunny", "bugs bunny");
+    str_eq(map_get(map, "Bugs Bunny"), "bugs bunny");
 
-    xs_eq(map_len(map), 2);
+    eq(map_len(map), 2);
 
     /* Test int */
 
     int *year = malloc(sizeof(int));
     *year = 1940;
-    map_put(map, "year", year);
+    map_set(map, "year", year);
 
     int *check_year = map_get(map, "year");
 
-    xs_eq(*check_year, *year);
+    eq(*check_year, *year);
 
-    xs_eq(map_len(map), 3);
+    eq(map_len(map), 3);
 
     /* Test structure */
 
-    test_t *test = malloc(sizeof(test_t));
+    Test *test = malloc(sizeof(test));
     test->count = 42;
     test->msg = strdup("Bugs Bunny");
 
-    map_put(map, "bugs_test", test);
+    map_set(map, "bugs_test", test);
 
-    test_t *check_test = map_get(map, "bugs_test");
+    Test *check_test = map_get(map, "bugs_test");
 
-    xs_eq(check_test->count, test->count);
-    xs_str_eq(check_test->msg, test->msg);
+    eq(check_test->count, test->count);
+    str_eq(check_test->msg, test->msg);
 
-    xs_eq(map_len(map), 4);
+    eq(map_len(map), 4);
 
     map_free(map);
 
-    xs_eq(*year, 1940);
-    xs_eq(*check_year, 1940);
+    eq(*year, 1940);
+    eq(*check_year, 1940);
 
-    xs_eq(check_test->count, 42);
-    xs_eq(test->count, 42);
-    xs_str_eq(check_test->msg, "Bugs Bunny");
-    xs_str_eq(test->msg, "Bugs Bunny");
+    eq(check_test->count, 42);
+    eq(test->count, 42);
+    str_eq(check_test->msg, "Bugs Bunny");
+    str_eq(test->msg, "Bugs Bunny");
 }
 
 void test_get()
 {
-    map_t *map = map_new();
+    Map *map = map_new(4);
 
     char *val = map_get(map, "Bugs Bunny");
 
-    xs_null(val);
+    null(val);
 
-    xs_eq(map_in(map, "Bugs Bunny"), 0);
+    eq(map_in(map, "Bugs Bunny"), 0);
 
-    map_put(map, "Bugs Bunny", "Bugs Bunny");
+    map_set(map, "Bugs Bunny", "Bugs Bunny");
 
-    xs_eq(map_in(map, "Bugs Bunny"), 1);
+    eq(map_in(map, "Bugs Bunny"), 1);
 
     map_free(map);
 }
 
 void test_del()
 {
-    map_t *map = map_new();
+    Map *map = map_new(8);
 
-    xs_eq(map_len(map), 0);
+    eq(map_len(map), 0);
 
     /* Test string */
 
-    map_put(map, "Bugs", "Bunny");
+    map_set(map, "Bugs", "Bunny");
 
-    xs_eq(map_len(map), 1);
+    eq(map_len(map), 1);
 
     map_del(map, "Bugs");
 
-    xs_eq(map_len(map), 0);
+    eq(map_len(map), 0);
 
     /* Check items that do not exist */
     map_del(map, "Bugs");
 
-    xs_eq(map_len(map), 0);
+    eq(map_len(map), 0);
 
     map_del(map, "Bunny");
 
-    xs_eq(map_len(map), 0);
+    eq(map_len(map), 0);
 
     /* Test structure */
 
-    test_t *test = malloc(sizeof(test_t));
+    Test *test = malloc(sizeof(test));
     test->count = 42;
     test->msg = strdup("Bugs Bunny");
 
-    map_put(map, "Bugs", test);
+    map_set(map, "Bugs", test);
 
-    xs_eq(map_len(map), 1);
+    eq(map_len(map), 1);
 
-    test_t *check_test = map_get(map, "Bugs");
+    Test *check_test = map_get(map, "Bugs");
 
-    xs_eq(check_test->count, test->count);
-    xs_str_eq(check_test->msg, test->msg);
+    eq(check_test->count, test->count);
+    str_eq(check_test->msg, test->msg);
 
     map_del(map, "Bugs");
 
-    xs_eq(map_len(map), 0);
+    eq(map_len(map), 0);
 
     free(test);
     map_free(map);
@@ -137,9 +137,9 @@ void test_del()
 
 void test_auto_resize()
 {
-    map_t *map = map_new();
+    Map *map = map_new(12);
 
-    xs_eq(map_len(map), 0);
+    eq(map_len(map), 0);
 
     char tmp[100];
 
@@ -153,17 +153,17 @@ void test_auto_resize()
     for (int i = 0; i < items; i++) {
         snprintf(strings[i], 1000, "Testy McTest %d", i);
 
-        map_put(map, strings[i], strings[i]);
+        map_set(map, strings[i], strings[i]);
     }
 
-    xs_eq(map_len(map), items);
+    eq(map_len(map), items);
 
     for (int i = 0; i < items; i++) {
         snprintf(tmp, sizeof(tmp), "Testy McTest %d", i);
 
         char *value = map_get(map, tmp);
 
-        xs_str_eq(value, tmp);
+        str_eq(value, tmp);
     }
 
     map_free(map);

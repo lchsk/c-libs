@@ -1,29 +1,21 @@
-#ifndef XS_MAP_H
-#define XS_MAP_H
-
-#define XS_INITIAL_MAP_SIZE (16)
-
-#define XS_MAP_RESIZE_FACTOR (0.666)
+#ifndef MAP_H
+#define MAP_H
 
 typedef struct {
     int size;
     int len;
     char **keys;
     void **values;
-} map_t;
+} Map;
 
-map_t *map_new();
+Map *map_new(int initial_size);
+void map_free(Map *map);
 
-void map_put(map_t *map, char *key, void *value);
+void map_set(Map *map, char *key, void *value);
+void *map_get(Map *map, char *key);
 
-void map_del(map_t *map, char *key);
-
-void *map_get(map_t *map, char *key);
-
-unsigned map_in(map_t *map, char *key);
-
-unsigned map_len(map_t *map);
-
-void map_free(map_t *map);
+void map_del(Map *map, char *key);
+const int map_in(Map *map, char *key);
+const int map_len(Map *map);
 
 #endif
