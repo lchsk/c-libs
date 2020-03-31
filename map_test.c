@@ -18,19 +18,19 @@ void test_different_types()
 {
     Map *map = map_new(5);
 
-    eq(map_len(map), 0);
+    eq(map_size(map), 0);
 
     /* Test string */
 
     map_set(map, "Bugs", "Bunny");
     str_eq(map_get(map, "Bugs"), "Bunny");
 
-    eq(map_len(map), 1);
+    eq(map_size(map), 1);
 
     map_set(map, "Bugs Bunny", "bugs bunny");
     str_eq(map_get(map, "Bugs Bunny"), "bugs bunny");
 
-    eq(map_len(map), 2);
+    eq(map_size(map), 2);
 
     /* Test int */
 
@@ -42,7 +42,7 @@ void test_different_types()
 
     eq(*check_year, *year);
 
-    eq(map_len(map), 3);
+    eq(map_size(map), 3);
 
     /* Test structure */
 
@@ -57,7 +57,7 @@ void test_different_types()
     eq(check_test->count, test->count);
     str_eq(check_test->msg, test->msg);
 
-    eq(map_len(map), 4);
+    eq(map_size(map), 4);
 
     map_free(map);
 
@@ -91,26 +91,26 @@ void test_del()
 {
     Map *map = map_new(8);
 
-    eq(map_len(map), 0);
+    eq(map_size(map), 0);
 
     /* Test string */
 
     map_set(map, "Bugs", "Bunny");
 
-    eq(map_len(map), 1);
+    eq(map_size(map), 1);
 
     map_del(map, "Bugs");
 
-    eq(map_len(map), 0);
+    eq(map_size(map), 0);
 
     /* Check items that do not exist */
     map_del(map, "Bugs");
 
-    eq(map_len(map), 0);
+    eq(map_size(map), 0);
 
     map_del(map, "Bunny");
 
-    eq(map_len(map), 0);
+    eq(map_size(map), 0);
 
     /* Test structure */
 
@@ -120,7 +120,7 @@ void test_del()
 
     map_set(map, "Bugs", test);
 
-    eq(map_len(map), 1);
+    eq(map_size(map), 1);
 
     Test *check_test = map_get(map, "Bugs");
 
@@ -129,7 +129,7 @@ void test_del()
 
     map_del(map, "Bugs");
 
-    eq(map_len(map), 0);
+    eq(map_size(map), 0);
 
     free(test);
     map_free(map);
@@ -139,7 +139,7 @@ void test_auto_resize()
 {
     Map *map = map_new(12);
 
-    eq(map_len(map), 0);
+    eq(map_size(map), 0);
 
     char tmp[100];
 
@@ -156,7 +156,7 @@ void test_auto_resize()
         map_set(map, strings[i], strings[i]);
     }
 
-    eq(map_len(map), items);
+    eq(map_size(map), items);
 
     for (int i = 0; i < items; i++) {
         snprintf(tmp, sizeof(tmp), "Testy McTest %d", i);

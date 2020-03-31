@@ -30,8 +30,8 @@ Map *map_new(int initial_size)
 
     map->keys = malloc(initial_size * sizeof(char *));
     map->values = malloc(initial_size * sizeof(void *));
-    map->size = initial_size;
-    map->len = 0;
+    map->cap = initial_size;
+    map->size = 0;
 
     return map;
 }
@@ -63,7 +63,7 @@ void map_set(Map *map, char *key, void *value)
 
     map->keys[i] = key;
     map->values[i] = value;
-    map->len++;
+    map->size++;
 }
 
 void map_del(Map *map, char *key)
@@ -75,7 +75,7 @@ void map_del(Map *map, char *key)
     if (map->values[i] && map->keys[i]) {
         map->values[i] = NULL;
         map->keys[i] = NULL;
-        map->len--;
+        map->size--;
     }
 }
 
@@ -88,11 +88,11 @@ void *map_get(Map *map, char *key)
     return map->values[i];
 }
 
-const int map_len(Map *map)
+const int map_size(Map *map)
 {
     assert(map != NULL);
 
-    return map->len;
+    return map->size;
 }
 
 const int map_in(Map *map, char *key)
@@ -119,26 +119,26 @@ static const int map_index(Map *map, char *key, char **keys)
 {
     assert(map != NULL);
 
-    int i = hash(key) % map->size;
+    int i = hash(key) % map->cap;
 
     while (keys[i] && _strcmp(keys[i], key) != 0)
-        i = (i + 1) % map->size;
+        i = (i + 1) % map->cap;
 
     return i;
 }
 
 static void resize(Map *map)
 {
-    if (map->len < map->size * MAP_RESIZE_TRIGGER) {
+    if (map->size < map->cap * MAP_RESIZE_TRIGGER) {
         return;
     }
 
-    map->size = map->size * MAP_RESIZE_FACTOR;
+    map->cap = map->cap * MAP_RESIZE_FACTOR;
 
-    char **keys = malloc(map->size * sizeof(char *));
-    void **values = malloc(map->size * sizeof(void *));
+    char **keys = malloc(map->cap * sizeof(char *));
+    void **values = malloc(map->cap * sizeof(void *));
 
-    for (int i = 0; i < map->size / MAP_RESIZE_FACTOR; i++) {
+    for (int i = 0; i < map->cap / MAP_RESIZE_FACTOR; i++) {
         char *key = map->keys[i];
         void *value = map->values[i];
 

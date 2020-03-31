@@ -3,7 +3,7 @@
 
 typedef struct {
     int size;
-    int len;
+    int cap;
     char **keys;
     void **values;
 } Map;
@@ -16,6 +16,6 @@ void *map_get(Map *map, char *key);
 
 void map_del(Map *map, char *key);
 const int map_in(Map *map, char *key);
-const int map_len(Map *map);
+const int map_size(Map *map);
 
 #endif
