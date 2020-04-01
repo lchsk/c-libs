@@ -13,7 +13,7 @@ static const double MAP_RESIZE_TRIGGER = 0.6;
 // By what factor we're enlarging the map
 static const int MAP_RESIZE_FACTOR = 2;
 
-int _strcmp(const char* s1, const char* s2)
+int strcmp_(const char* s1, const char* s2)
 {
     while(*s1 && (*s1 == *s2))
     {
@@ -26,10 +26,10 @@ int _strcmp(const char* s1, const char* s2)
 
 Map *map_new(int initial_size)
 {
-    Map *map = malloc(sizeof(map));
+    Map *map = calloc(1, sizeof(Map));
 
-    map->keys = malloc(initial_size * sizeof(char *));
-    map->values = malloc(initial_size * sizeof(void *));
+    map->keys = calloc(initial_size, sizeof(char *));
+    map->values = calloc(initial_size, sizeof(void *));
     map->cap = initial_size;
     map->size = 0;
 
@@ -86,6 +86,8 @@ void *map_get(Map *map, char *key)
     const int i = map_index(map, key, map->keys);
 
     return map->values[i];
+
+    return NULL;
 }
 
 const int map_size(Map *map)
@@ -121,22 +123,25 @@ static const int map_index(Map *map, char *key, char **keys)
 
     int i = hash(key) % map->cap;
 
-    while (keys[i] && _strcmp(keys[i], key) != 0)
+    while (keys[i] && strcmp_(keys[i], key) != 0) {
         i = (i + 1) % map->cap;
+    }
 
     return i;
 }
 
 static void resize(Map *map)
 {
+    assert(map != NULL);
+
     if (map->size < map->cap * MAP_RESIZE_TRIGGER) {
         return;
     }
 
     map->cap = map->cap * MAP_RESIZE_FACTOR;
 
-    char **keys = malloc(map->cap * sizeof(char *));
-    void **values = malloc(map->cap * sizeof(void *));
+    char **keys = calloc(map->cap, sizeof(char *));
+    void **values = calloc(map->cap, sizeof(void *));
 
     for (int i = 0; i < map->cap / MAP_RESIZE_FACTOR; i++) {
         char *key = map->keys[i];

@@ -4,49 +4,46 @@
 #include <assert.h>
 
 #include "map.h"
+#include "test.h"
 
 typedef struct {
     char *msg;
     int count;
 } Test;
 
-#define eq(val1, val2) assert(val1 == val2)
-#define null(val) assert(val == NULL)
-#define str_eq(str1, str2) assert(strcmp(str1, str2) == 0)
-
 void test_different_types()
 {
     Map *map = map_new(5);
 
-    eq(map_size(map), 0);
+    TEST_EQ(map_size(map), 0);
 
     /* Test string */
 
     map_set(map, "Bugs", "Bunny");
-    str_eq(map_get(map, "Bugs"), "Bunny");
+    TEST_EQ_STR(map_get(map, "Bugs"), "Bunny");
 
-    eq(map_size(map), 1);
+    TEST_EQ(map_size(map), 1);
 
     map_set(map, "Bugs Bunny", "bugs bunny");
-    str_eq(map_get(map, "Bugs Bunny"), "bugs bunny");
+    TEST_EQ_STR(map_get(map, "Bugs Bunny"), "bugs bunny");
 
-    eq(map_size(map), 2);
+    TEST_EQ(map_size(map), 2);
 
     /* Test int */
 
-    int *year = malloc(sizeof(int));
+    int *year = calloc(1, sizeof(int));
     *year = 1940;
     map_set(map, "year", year);
 
     int *check_year = map_get(map, "year");
 
-    eq(*check_year, *year);
+    TEST_EQ(*check_year, *year);
 
-    eq(map_size(map), 3);
+    TEST_EQ(map_size(map), 3);
 
     /* Test structure */
 
-    Test *test = malloc(sizeof(test));
+    Test *test = calloc(1, sizeof(Test));
     test->count = 42;
     test->msg = strdup("Bugs Bunny");
 
@@ -54,35 +51,38 @@ void test_different_types()
 
     Test *check_test = map_get(map, "bugs_test");
 
-    eq(check_test->count, test->count);
-    str_eq(check_test->msg, test->msg);
+    TEST_EQ(check_test->count, test->count);
+    TEST_EQ_STR(check_test->msg, test->msg);
 
-    eq(map_size(map), 4);
+    TEST_EQ(map_size(map), 4);
 
     map_free(map);
 
-    eq(*year, 1940);
-    eq(*check_year, 1940);
+    TEST_EQ(*year, 1940);
+    TEST_EQ(*check_year, 1940);
 
-    eq(check_test->count, 42);
-    eq(test->count, 42);
-    str_eq(check_test->msg, "Bugs Bunny");
-    str_eq(test->msg, "Bugs Bunny");
+    TEST_EQ(check_test->count, 42);
+    TEST_EQ(test->count, 42);
+    TEST_EQ_STR(check_test->msg, "Bugs Bunny");
+    TEST_EQ_STR(test->msg, "Bugs Bunny");
+
+    free(test->msg);
+    free(test);
+    free(year);
 }
 
 void test_get()
 {
     Map *map = map_new(4);
-
     char *val = map_get(map, "Bugs Bunny");
 
-    null(val);
+    TEST_NULL(val);
 
-    eq(map_in(map, "Bugs Bunny"), 0);
+    TEST_EQ(map_in(map, "Bugs Bunny"), 0);
 
     map_set(map, "Bugs Bunny", "Bugs Bunny");
 
-    eq(map_in(map, "Bugs Bunny"), 1);
+    TEST_EQ(map_in(map, "Bugs Bunny"), 1);
 
     map_free(map);
 }
@@ -91,46 +91,47 @@ void test_del()
 {
     Map *map = map_new(8);
 
-    eq(map_size(map), 0);
+    TEST_EQ(map_size(map), 0);
 
     /* Test string */
 
     map_set(map, "Bugs", "Bunny");
 
-    eq(map_size(map), 1);
+    TEST_EQ(map_size(map), 1);
 
     map_del(map, "Bugs");
 
-    eq(map_size(map), 0);
+    TEST_EQ(map_size(map), 0);
 
     /* Check items that do not exist */
     map_del(map, "Bugs");
 
-    eq(map_size(map), 0);
+    TEST_EQ(map_size(map), 0);
 
     map_del(map, "Bunny");
 
-    eq(map_size(map), 0);
+    TEST_EQ(map_size(map), 0);
 
     /* Test structure */
 
-    Test *test = malloc(sizeof(test));
+    Test *test = calloc(1, sizeof(Test));
     test->count = 42;
     test->msg = strdup("Bugs Bunny");
 
     map_set(map, "Bugs", test);
 
-    eq(map_size(map), 1);
+    TEST_EQ(map_size(map), 1);
 
     Test *check_test = map_get(map, "Bugs");
 
-    eq(check_test->count, test->count);
-    str_eq(check_test->msg, test->msg);
+    TEST_EQ(check_test->count, test->count);
+    TEST_EQ_STR(check_test->msg, test->msg);
 
     map_del(map, "Bugs");
 
-    eq(map_size(map), 0);
+    TEST_EQ(map_size(map), 0);
 
+    free(test->msg);
     free(test);
     map_free(map);
 }
@@ -139,33 +140,38 @@ void test_auto_resize()
 {
     Map *map = map_new(12);
 
-    eq(map_size(map), 0);
+    TEST_EQ(map_size(map), 0);
 
     char tmp[100];
 
     int items = 15000;
-    char **strings = malloc(items * sizeof(char*));
+    char **strings = calloc(items, sizeof(char*));
 
     for (int i = 0; i < items; i++) {
-        strings[i] = malloc(100);
+        strings[i] = calloc(100, sizeof(char));
     }
 
     for (int i = 0; i < items; i++) {
-        snprintf(strings[i], 1000, "Testy McTest %d", i);
+        snprintf(strings[i], 100, "Testy McTest %d", i);
 
         map_set(map, strings[i], strings[i]);
     }
 
-    eq(map_size(map), items);
+    TEST_EQ(map_size(map), items);
 
     for (int i = 0; i < items; i++) {
         snprintf(tmp, sizeof(tmp), "Testy McTest %d", i);
 
         char *value = map_get(map, tmp);
 
-        str_eq(value, tmp);
+        TEST_EQ_STR(value, tmp);
     }
 
+    for (int i = 0; i < items; i++) {
+        free(strings[i]);
+    }
+
+    free(strings);
     map_free(map);
 }
 
